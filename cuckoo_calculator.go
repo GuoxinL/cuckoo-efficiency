@@ -1,7 +1,7 @@
 /*
    Created by guoxin in 2022/4/1 11:26 AM
 */
-package main
+package eff
 
 import (
 	"fmt"
@@ -22,13 +22,13 @@ func main() {
 		// b 桶大小
 		b float64 = 2
 		// f 指纹大小
-		f float64 = 32
+		f float64 = 24
 		// α 负载因子 nolint
 		α float64 = 0
 		// C 每个项均摊成本
 		C float64 = 0
 		// 指定过滤器大小
-		size float64 = 2_000_000
+		size float64 = 1_000_000
 	)
 	α = GetLoadFactor(uint32(b))
 	fmt.Println("init success")

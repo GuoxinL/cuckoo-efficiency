@@ -1,3 +1,5 @@
 .idea
 test_report*
 *.iml
+data
+logs

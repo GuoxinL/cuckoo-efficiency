@@ -1,6 +1,6 @@
 # cuckoo-efficiency
 
-用于给[github.com/linvon/cuckoo-filter](https://github.com/linvon/cuckoo-filter)提供更多的数据支持
+用于给[github.com/linvon/cuckoo-filter](https://github.com/linvon/cuckoo-filter)提供更多的数据支持，以便于
 
 ## 功能1 布谷鸟过滤器计算器
 
@@ -169,6 +169,11 @@ test_report_2022-09-02_14:12:07
 ## 功能2 压力测试性能分析
 
 通过传入给定指纹参数`--fingerprint`，对比在`b=[2,4,8,16]`对已满的cuckoo进行压力测试，并输出测试报告
+
+```shell
+go test -timeout=100m -v -test.run Test_pressure --fingerprint=16 --table-type=0 --size=1000000 --height=10000 --goroutines=100 --loop=100
+```
+
 ```shell
 tree -L 3 test_report_2022-09-02_14:38:08 
 test_report_2022-09-02_14:38:08
@@ -178,8 +183,6 @@ test_report_2022-09-02_14:38:08
 └── cuckoo_filter_size_1000000_full_size_1000000_real_size_2055208_tabletype_0_tagsperbucket_8_bitsperitem_16_.html
 
 ```
-```shell
-go test -timeout=100m -v -test.run Test_pressure --fingerprint=16 --table-type=0 --size=1000000 --height=10000 --goroutines=100 --loop=100
-```
+
 
 ![img.png](images/img.png)

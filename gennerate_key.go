@@ -1,7 +1,7 @@
 /*
    Created by guoxin in 2022/8/31 3:38 PM
 */
-package main
+package eff
 
 import (
 	"crypto/rand"

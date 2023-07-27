@@ -1,0 +1,80 @@
+tx_filter:
+  # default(store) 0; bird's nest 1; map 2; 3 sharding bird's nest
+  # 3 is recommended.
+  type: 3
+  # sharding bird's nest config
+  # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+  sharding:
+    # sharding number
+    length: 20
+    # sharding task timeout in seconds
+    timeout: 60
+    snapshot:
+      # serialize type
+      # 0 Serialization by height interval
+      # 1 Serialization by time interval
+      type: 0
+      timed:
+        # Time interval in seconds
+        interval: 10
+      block_height:
+        # Block height interval
+        interval: 10
+      # Serialization interval in seconds
+      serialize_interval: 10
+      # file path
+      path: ../data/node1/tx_filter
+    # bird's nest config
+    birds_nest:
+      # bird's nest size
+      length: 5
+      # Transaction filter rules
+      rules:
+        # Absolute expiration time /second
+        # Based on the number of transactions per day, for example, the current total capacity of blockchain transaction
+        # filters is 100 million, and there are 10 million transaction requests per day.
+        #
+        # total keys = sharding.length * sharding.birds_nest.length * sharding.birds_nest.cuckoo.max_num_keys
+        #
+        # absolute expire time = total keys / number of requests per day
+        absolute_expire_time: 172800
+      cuckoo:
+        # 0 NormalKey; 1 TimestampKey
+        key_type: 1
+        # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
+        # If you are using a semi-sorted bucket, the default is 4
+        # 2 is recommended.
+        tags_per_bucket: 2
+        # num of bits for each item, which is length of tag(fingerprint)
+        # 11 is recommended.
+        bits_per_item: 17
+        # keys number
+        max_num_keys: 1000000
+        # 0 TableTypeSingle normal single table
+        # 1 TableTypePacked packed table, use semi-sort to save 1 bit per item
+        # 0 is recommended
+        table_type: 0
+
+log:
+  module: "[SERVER]"
+  log_path: ../logs/system.log
+  log_level: INFO
+  max_age: 60
+  log_in_console: false
+  show_line: true
+
+redis:
+  # redis 密码
+  pw: "weixin123@!"
+  # redis DB编码
+  db: 0
+  # redis 地址
+  addr: "10.5.5.61:6379"
+  sentinel:
+    enable: true
+    master_name: "mymaster"
+    pw: "weixin123@!"
+    addr:
+      - "10.5.5.92:26379"
+      - "10.5.5.96:26379"
+      - "10.5.5.111:26379"

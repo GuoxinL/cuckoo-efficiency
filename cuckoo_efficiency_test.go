@@ -1,7 +1,7 @@
 /*
    Created by guoxin in 2022/4/10 12:47 PM
 */
-package main
+package eff
 
 import (
 	"flag"
@@ -14,7 +14,7 @@ import (
 )
 
 var fingerprint = flag.Uint("fingerprint", 16, "指纹长度，用于\"压力性能分析\"")
-var tableType = flag.Uint("table-type", cuckoo.TableTypeSingle, "指纹长度，用于\"压力性能分析\"")
+var tableType = flag.Uint("table-type", cuckoo.TableTypeSingle, "过滤器类型 0 Single, 1 Packed")
 var size = flag.Int("size", SIZE, "测试布谷鸟过滤器的总数据量")
 var height = flag.Int("height", HEIGHT, "高度：将总数据量/高度=每个批次处理的数据")
 var goroutines = flag.Int("goroutines", ContainsGoroutinesNumber, "contains操作，并发的协程池数量")
@@ -49,9 +49,7 @@ func Test_exhaustion(t *testing.T) {
 	for i := float64(1); i <= 4; i++ {
 		b := uint(math.Pow(2, i))
 		for f := uint(9); f <= 32; f++ {
-			tests = append(tests, cas{
-				name: fmt.Sprintf("性能测试 size:%v,height:%v,b:%v,f:%v,type:%v,goroutinesNumber:%v,loopNumber:%v",
-					*size, *height, b, f, *tableType, *goroutines, *loop),
+			case0 := cas{
 				args: args{
 					size:             *size,
 					height:           *height,
@@ -61,7 +59,10 @@ func Test_exhaustion(t *testing.T) {
 					goroutinesNumber: *goroutines,
 					loopNumber:       *loop,
 				},
-			})
+			}
+			case0.name = fmt.Sprintf("性能测试 size:%v,height:%v,b:%v,f:%v,type:%v,goroutinesNumber:%v,loopNumber:%v",
+				case0.args.size, case0.args.height, case0.args.b, case0.args.f, case0.args.typ, case0.args.goroutinesNumber, case0.args.loopNumber)
+			tests = append(tests, case0)
 		}
 	}
 	for _, tt := range tests {
@@ -77,9 +78,7 @@ func Test_pressure(t *testing.T) {
 	var tests []cas
 	for i := float64(1); i <= 4; i++ {
 		b := uint(math.Pow(2, i))
-		tests = append(tests, cas{
-			name: fmt.Sprintf("性能测试 size:%v,height:%v,b:%v,f:%v,type:%v,goroutinesNumber:%v,loopNumber:%v",
-				*size, *height, b, *fingerprint, *tableType, *goroutines, *loop),
+		case0 := cas{
 			args: args{
 				size:             *size,
 				height:           *height,
@@ -89,8 +88,35 @@ func Test_pressure(t *testing.T) {
 				goroutinesNumber: *goroutines,
 				loopNumber:       *loop,
 			},
+		}
+		case0.name = fmt.Sprintf("性能测试 size:%v,height:%v,b:%v,f:%v,type:%v,goroutinesNumber:%v,loopNumber:%v",
+			case0.args.size, case0.args.height, case0.args.b, case0.args.f, case0.args.typ, case0.args.goroutinesNumber, case0.args.loopNumber)
+		tests = append(tests, case0)
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			efficiency(tt.args.size, tt.args.height, tt.args.b, tt.args.f, tt.args.typ, tt.args.goroutinesNumber,
+				tt.args.loopNumber, *reportPath)
 		})
 	}
+}
+
+func Test_b2_f11(t *testing.T) {
+	printParameters()
+	var tests []cas
+	tests = append(tests, cas{
+		name: fmt.Sprintf("性能测试 size:%v,height:%v,b:%v,f:%v,type:%v,goroutinesNumber:%v,loopNumber:%v",
+			*size, *height, 2, *fingerprint, *tableType, *goroutines, *loop),
+		args: args{
+			size:             *size,
+			height:           *height,
+			b:                2,
+			f:                32,
+			typ:              *tableType,
+			goroutinesNumber: *goroutines,
+			loopNumber:       *loop,
+		},
+	})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			efficiency(tt.args.size, tt.args.height, tt.args.b, tt.args.f, tt.args.typ, tt.args.goroutinesNumber,
