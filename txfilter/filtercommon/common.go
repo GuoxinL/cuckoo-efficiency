@@ -10,6 +10,7 @@ package filtercommon
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	bn "chainmaker.org/chainmaker/common/v2/birdsnest"
@@ -27,10 +28,23 @@ func ShowLog(funcName string, txId string, start time.Time, log protocol.Logger)
 		log.Warn(LoggingFixLength("The [%s] method takes too long. costs: %v, txid: %s", funcName, txId, since))
 	}
 }
-func ShowExistsLog(funcName string, exists bool, txId string, start time.Time, costses []time.Duration, log protocol.Logger) {
+func ShowExistsLog(funcName string, exists bool, txId string, start time.Time, costses []time.Duration, log protocol.Logger, infos [][]uint64) {
 	since := time.Since(start)
 	if since.Milliseconds() > 100 {
-		log.Warnf("The [%s] method takes too long. exists: %v, txid: %s, costs: %v, filters: %v", funcName, exists, txId, since, costses)
+		builder := strings.Builder{}
+		for i := range infos {
+			//infos[0] = b.height
+			//infos[1] = uint64(b.config.Length) // cuckoo size
+			//infos[2] = uint64(b.currentIndex)  // current index
+			//for _, filter := range b.filters {
+			//	info := filter.Info()
+			//	infos[3] += info[0] // total keys size
+			//	infos[4] += info[1] // total space
+			sprintf := fmt.Sprintf("sharding:%v,height:%v,cuckooLength:%v,currentIndex:%v,cuckooKeys:%v,space:%v\n", i, infos[i][0], infos[i][1], infos[i][2], infos[i][3], infos[i][4])
+			builder.WriteString(sprintf)
+		}
+
+		log.Warnf("The [%s] method takes too long. exists: %v, txid: %s, costs: %v, filters: %v, info: %v", funcName, exists, txId, since, costses, builder.String())
 	}
 }
 

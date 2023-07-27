@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		return
 	}
+	var wg sync.WaitGroup
 
 	for height := uint64(0); height < math.MaxUint64; height++ {
 		front := TxQueue.PopFront()
@@ -43,13 +44,12 @@ func main() {
 			time.Sleep(time.Second)
 			continue
 		}
-		existsCosts := time.Now()
 		keys := front.([]birdsnest.Key)
 		batch := DispatchTxVerifyTask(keys)
 		//f := &fileterpb.Stat{}
-		var wg sync.WaitGroup
 		waitCount := len(batch)
 		wg.Add(waitCount)
+		existsCosts := time.Now()
 		for i := 0; i < waitCount; i++ {
 			index := i
 			go func() {

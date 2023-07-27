@@ -210,7 +210,7 @@ func (f *TxFilter) IsExists(txId string, ruleType ...bn.RuleType) (exists bool, 
 	start := time.Now()
 	contains, costses, err = f.bn.Contains(key, ruleType...)
 	filterCosts := time.Since(start)
-	defer filtercommon.ShowExistsLog("IsExists", exists, txId, start, costses, f.log)
+	defer filtercommon.ShowExistsLog("IsExists", exists, txId, start, costses, f.log, f.bn.Infos())
 	if err != nil {
 		// If not, query DB
 		if err == bn.ErrKeyTimeIsNotInTheFilterRange {

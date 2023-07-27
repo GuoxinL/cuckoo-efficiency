@@ -13,10 +13,10 @@ tx_filter:
       # serialize type
       # 0 Serialization by height interval
       # 1 Serialization by time interval
-      type: 0
+      type: 1
       timed:
         # Time interval in seconds
-        interval: 10
+        interval: 600
       block_height:
         # Block height interval
         interval: 10
@@ -44,10 +44,10 @@ tx_filter:
         # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
         # If you are using a semi-sorted bucket, the default is 4
         # 2 is recommended.
-        tags_per_bucket: 2
+        tags_per_bucket: 1
         # num of bits for each item, which is length of tag(fingerprint)
         # 11 is recommended.
-        bits_per_item: 17
+        bits_per_item: 11
         # keys number
         max_num_keys: 1000000
         # 0 TableTypeSingle normal single table

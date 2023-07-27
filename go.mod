@@ -3,7 +3,7 @@ module github.com/GuoxinL/cuckoo-efficiency
 go 1.18
 
 require (
-	chainmaker.org/chainmaker/common/v2 v2.3.2-0.20230726054438-e77f4ccd5921
+	chainmaker.org/chainmaker/common/v2 v2.3.2-0.20230727072931-809b650e1baf
 	chainmaker.org/chainmaker/localconf/v2 v2.3.1-0.20221215134953-099e5383ca6b // v2.3.0_qc_sz
 	chainmaker.org/chainmaker/pb-go/v2 v2.3.3-0.20230725062642-db1462361361
 	chainmaker.org/chainmaker/protocol/v2 v2.3.2-0.20221210062113-6dbeaa53eb9c // v2.3.1_qc_sz_store
