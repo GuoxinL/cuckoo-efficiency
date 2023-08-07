@@ -187,53 +187,87 @@ func (f *TxFilter) AddsAndSetHeight(txIds []string, height uint64) error {
 
 // IsExists Check whether TxId exists in the transaction filter
 func (f *TxFilter) IsExists(txId string, ruleType ...bn.RuleType) (exists bool, stat *txfilter.Stat, err error) {
-	//start1 := time.Now()
-
 	var (
 		key      bn.TimestampKey
 		contains bool
-		costses  []time.Duration
-	)
+		costs    [][]time.Duration
+		dbCost   time.Duration
 
-	var costs time.Duration
+		total time.Duration
+		exist time.Duration
+
+		before = make([]time.Duration, 0, 8)
+		after  = make([]time.Duration, 2)
+	)
+	start := time.Now()
+	defer func() {
+		total = time.Since(start)
+		if len(ruleType) != 0 {
+			filtercommon.ShowExistsLog("TxPoolIsExists", exists, txId, total, before, exist, after, costs, f.log)
+		} else {
+			filtercommon.ShowExistsLog("IsExists", exists, txId, total, before, exist, after, costs, f.log)
+		}
+	}()
+
 	// Convert the transaction ID to TimestampKey
-	key, err = bn.ToTimestampKey(txId)
+	var costsa []time.Duration
+	key, costsa, err = bn.ToTimestampKeyTime(txId)
+	since := time.Since(start)
+	before = append(before, costsa...)
+	before = append(before, 0)
+	before = append(before, since)
 	if err != nil {
-		exists, costs, err = f.findDb(txId)
+		exists, dbCost, err = f.findDb(txId)
 		if err != nil {
 			err = fmt.Errorf("%v, txid type: normal", err)
 		}
-		return exists, filtercommon.NewStat0(0, costs, nil), err
+		return exists, filtercommon.NewStat0(0, dbCost, nil), err
 	}
+	before = append(before, time.Since(start))
 	f.l.RLock()
 	defer f.l.RUnlock()
-	start := time.Now()
-	contains, costses, err = f.bn.Contains(key, ruleType...)
-	filterCosts := time.Since(start)
-	defer filtercommon.ShowExistsLog("IsExists", exists, txId, start, costses, f.log, f.bn.Infos())
+	before = append(before, time.Since(start))
+
+	// TODO cuckoo 慢
+	// cost(total:240.713523ms,before:1.429µs,exist:240.710835ms,after:903ns),
+	// filters: [[97ns 591ns] [97ns 240.703359ms] [311ns 618ns] [74ns 612ns] [101ns 527ns] [76ns 565ns]]
+	existStart := time.Now()
+	contains, costs, err = f.bn.Contains(key, ruleType...)
+	exist = time.Since(existStart)
+
+	// TODO
+	afterStart := time.Now()
+	defer func() {
+		after = append(after, time.Since(afterStart))
+	}()
 	if err != nil {
 		// If not, query DB
 		if err == bn.ErrKeyTimeIsNotInTheFilterRange {
-			exists, costs, err = f.findDb(txId)
+			exists, dbCost, err = f.findDb(txId)
 			if err != nil {
 				err = fmt.Errorf("%v, key time is not in the filter range", err)
 			}
-			return exists, filtercommon.NewStat1(filterCosts, costs, costses), err
+			stat1 := filtercommon.NewStat1(exist, dbCost, costs)
+			after[0] = time.Since(afterStart)
+			return exists, stat1, err
 		}
 		f.log.Errorf("[%v] query from filter fail, error:%v", txId, err)
-		return contains, filtercommon.NewStat0(filterCosts, 0, costses), err
+		stat0 := filtercommon.NewStat0(exist, 0, costs)
+		after[1] = time.Since(afterStart)
+		// TODO 频繁创建对象
+		return contains, stat0, err
 	}
 
 	if contains {
-		exists, costs, err = f.findDb(txId)
+		exists, dbCost, err = f.findDb(txId)
 		if err != nil {
 			err = fmt.Errorf("%v, %v positive", err, exists)
 		}
-		return exists, filtercommon.NewStat1(filterCosts, costs, costses), err
+		return exists, filtercommon.NewStat1(exist, dbCost, costs), err
 	}
 
-	f.log.DebugDynamic(filtercommon.LoggingFixLengthFunc("[%v] does not exist in filter, cost: %v", txId, time.Since(start)))
-	return contains, filtercommon.NewStat0(filterCosts, 0, costses), nil
+	//f.log.DebugDynamic(filtercommon.LoggingFixLengthFunc("[%v] does not exist in filter, cost: %v", txId, time.Since(start)))
+	return contains, filtercommon.NewStat0(exist, 0, costs), nil
 }
 
 // Close transaction filter
@@ -242,10 +276,9 @@ func (f *TxFilter) Close() {
 }
 
 func (f *TxFilter) findDb(txId string) (bool, time.Duration, error) {
-	start1 := time.Now()
-	defer filtercommon.ShowLog("findDb", txId, start1, f.log)
-
 	start := time.Now()
+	defer filtercommon.ShowLog("findDb", txId, start, f.log)
+
 	exists, err := f.store.TxExists(txId)
 	costs := time.Since(start)
 	if err != nil {

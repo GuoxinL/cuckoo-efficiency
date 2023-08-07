@@ -15,16 +15,30 @@ import (
 
 var TxQueue = queue.New()
 
+var height uint64 = 0
+
+var C = make(chan uint64, 1)
+
+const shapeshift uint64 = 10000
+
+const txcount = 10000
+
 func Generate(log protocol.Logger) {
-	pool, err := ants.NewPool(10000)
+	pool, err := ants.NewPool(txcount)
 	if err != nil {
 		return
 	}
-	for height := uint64(0); height < math.MaxUint64; height++ {
-		var keys = make([]birdsnest.Key, 10000)
+	for ; height < math.MaxUint64; height++ {
+		go func() {
+			select {
+			case C <- height:
+			default:
+			}
+		}()
+		var keys = make([]birdsnest.Key, txcount)
 		wg := &sync.WaitGroup{}
-		wg.Add(10000)
-		for txIndex := 0; txIndex < 10000; txIndex++ {
+		wg.Add(txcount)
+		for txIndex := 0; txIndex < txcount; txIndex++ {
 			err = pool.Submit(generateKey(txIndex, keys, wg))
 			if err != nil {
 				log.Error(err)
@@ -35,9 +49,31 @@ func Generate(log protocol.Logger) {
 		for {
 			if TxQueue.Len() < 20 {
 				TxQueue.PushBack(keys)
+				// 1.6w*2 txpool and core
+				if height > shapeshift {
+					time.Sleep(time.Millisecond * 500)
+				}
 				break
 			} else {
-				time.Sleep(time.Second)
+				if height > shapeshift {
+					time.Sleep(time.Millisecond * 500)
+				} else {
+					time.Sleep(time.Microsecond * 10)
+				}
+			}
+		}
+	}
+}
+
+func TxPool(filter protocol.TxFilter, log protocol.Logger) {
+	var h uint64
+	for {
+		select {
+		case h = <-C:
+		default:
+			if h > shapeshift {
+				key := birdsnest.GenTxId()
+				_, _, _ = filter.IsExists(key, birdsnest.RuleType_AbsoluteExpireTime)
 			}
 		}
 	}

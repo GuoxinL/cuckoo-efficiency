@@ -14,13 +14,13 @@ import (
 )
 
 // NewStat txfilter stat
-func NewStat(fpCount uint32, filterCosts, dbCosts time.Duration, filtersCosts []time.Duration) *txfilter.Stat {
+func NewStat(fpCount uint32, filterCosts, dbCosts time.Duration, filtersCosts [][]time.Duration) *txfilter.Stat {
 	var filtersCostsMilli = make([]int64, 0, len(filtersCosts))
-	if len(filtersCosts) != 0 {
-		for _, cost := range filtersCosts {
-			filtersCostsMilli = append(filtersCostsMilli, cost.Milliseconds())
-		}
-	}
+	//if len(filtersCosts) != 0 {
+	//	for _, cost := range filtersCosts {
+	//		filtersCostsMilli = append(filtersCostsMilli, cost.Milliseconds())
+	//	}
+	//}
 	return &txfilter.Stat{
 		FpCount:      fpCount,
 		FilterCosts:  filterCosts.Milliseconds(),
@@ -30,11 +30,11 @@ func NewStat(fpCount uint32, filterCosts, dbCosts time.Duration, filtersCosts []
 }
 
 // NewStat0 txfilter stat FP count 0
-func NewStat0(filterCosts, dbCosts time.Duration, filtersCosts []time.Duration) *txfilter.Stat {
+func NewStat0(filterCosts, dbCosts time.Duration, filtersCosts [][]time.Duration) *txfilter.Stat {
 	return NewStat(0, filterCosts, dbCosts, filtersCosts)
 }
 
 // NewStat1 txfilter stat FP count 1
-func NewStat1(filterCosts, dbCosts time.Duration, filtersCosts []time.Duration) *txfilter.Stat {
+func NewStat1(filterCosts, dbCosts time.Duration, filtersCosts [][]time.Duration) *txfilter.Stat {
 	return NewStat(1, filterCosts, dbCosts, filtersCosts)
 }

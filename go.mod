@@ -3,7 +3,7 @@ module github.com/GuoxinL/cuckoo-efficiency
 go 1.18
 
 require (
-	chainmaker.org/chainmaker/common/v2 v2.3.2-0.20230727072931-809b650e1baf
+	chainmaker.org/chainmaker/common/v2 v2.3.2-0.20230807080652-7e6978b7fafb
 	chainmaker.org/chainmaker/localconf/v2 v2.3.1-0.20221215134953-099e5383ca6b // v2.3.0_qc_sz
 	chainmaker.org/chainmaker/pb-go/v2 v2.3.3-0.20230725062642-db1462361361
 	chainmaker.org/chainmaker/protocol/v2 v2.3.2-0.20221210062113-6dbeaa53eb9c // v2.3.1_qc_sz_store
@@ -83,6 +83,7 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/tinylru v1.1.0 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
+	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect

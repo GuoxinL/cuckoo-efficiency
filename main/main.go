@@ -36,8 +36,10 @@ func main() {
 	if err != nil {
 		return
 	}
+	go TxPool(filter, log)
 	var wg sync.WaitGroup
 
+	// TODO 模拟交易池进交易
 	for height := uint64(0); height < math.MaxUint64; height++ {
 		front := TxQueue.PopFront()
 		if front == nil {
@@ -61,6 +63,8 @@ func main() {
 			}()
 		}
 		wg.Wait()
+		// TODO
+		//time.Sleep(time.Millisecond * 30)
 		existsCostsT := time.Since(existsCosts)
 		txIds := birdsnest.ToStrings(keys)
 		addCosts := time.Now()

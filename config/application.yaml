@@ -44,10 +44,10 @@ tx_filter:
         # num of tags for each bucket, which is b in paper. tag is fingerprint, which is f in paper.
         # If you are using a semi-sorted bucket, the default is 4
         # 2 is recommended.
-        tags_per_bucket: 1
+        tags_per_bucket: 2
         # num of bits for each item, which is length of tag(fingerprint)
         # 11 is recommended.
-        bits_per_item: 11
+        bits_per_item: 17
         # keys number
         max_num_keys: 1000000
         # 0 TableTypeSingle normal single table
